@@ -1,0 +1,431 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MediTrack — Dashboard</title>
+
+  <!-- Tailwind Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // configure Tailwind with custom color
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            med: {
+              DEFAULT: '#007B83',
+              50: '#eaf6f6',
+              100: '#d6f0ef',
+              200: '#aee2df',
+              300: '#86d3cf',
+              400: '#5cc6c0',
+              500: '#2fb9b1',
+              600: '#009f98',
+              700: '#007B83',
+              800: '#005f66',
+              900: '#003f44',
+            }
+          },
+          borderRadius: {
+            'xl2': '14px'
+          },
+          boxShadow: {
+            'card': '0 8px 24px rgba(3,26,30,0.12)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* small extras */
+    .card-hover:hover { transform: translateY(-6px); box-shadow: 0 14px 30px rgba(3,26,30,0.12); }
+    .sidebar-scroll { max-height: calc(100vh - 80px); overflow-y:auto; }
+    /* clickable row */
+    .click-row:hover { background: #f3f9f9; cursor: pointer; }
+    /* custom scrollbar (optional) */
+    .sidebar-scroll::-webkit-scrollbar { width: 8px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
+  </style>
+</head>
+<body class="bg-med-50 font-sans text-slate-800">
+
+  <div class="min-h-screen flex">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-72 bg-white border-r border-gray-200 hidden lg:block">
+      <div class="p-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-md bg-med-700 flex items-center justify-center text-white font-bold">M</div>
+          <div>
+            <div class="text-lg font-semibold">MediTrack</div>
+            <div class="text-xs text-slate-400">Clinic Admin</div>
+          </div>
+        </div>
+
+        <nav class="mt-8 sidebar-scroll">
+          <ul class="space-y-1">
+            <li>
+              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md text-med-700 bg-med-50 hover:bg-med-100 transition">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zM13 21h8V11h-8v10zM13 3v6h8V3h-8z" fill="currentColor"/></svg>
+                <span class="font-medium">Dashboard</span>
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition text-slate-700">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.2 0 4-1.8 4-4S14.2 4 12 4s-4 1.8-4 4 1.8 4 4 4zm0 2c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z" fill="currentColor"/></svg>
+                Patients
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition text-slate-700">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M19 3H5a2 2 0 00-2 2v14l4-2 4 2 4-2 4 2V5a2 2 0 00-2-2z" fill="currentColor"/></svg>
+                Visits
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition text-slate-700">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M21 6h-6l-2-2H7a2 2 0 00-2 2v2H3v12h18V6z" fill="currentColor"/></svg>
+                Appointments
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition text-slate-700">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M3 7h18v2H3zM3 11h18v2H3zM3 15h12v2H3z" fill="currentColor"/></svg>
+                Reports
+              </a>
+            </li>
+
+            <li class="mt-6 pt-4 border-t border-gray-100">
+              <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition text-slate-700">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.2 0 4-1.8 4-4S14.2 4 12 4s-4 1.8-4 4 1.8 4 4 4zM4 20v-1.2C4 16.3 7.6 15 12 15s8 1.3 8 3.8V20" fill="currentColor"/></svg>
+                Doctors
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 min-h-screen">
+      <!-- topbar -->
+      <header class="flex items-center justify-between bg-white border-b border-gray-200 px-6 py-3">
+        <div class="flex items-center gap-4">
+          <button id="toggleMobile" class="lg:hidden p-2 rounded-md hover:bg-gray-100">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <div class="relative">
+            <input id="search" class="w-72 rounded-lg border border-gray-200 px-4 py-2 focus:ring-1 focus:ring-med-700" placeholder="Search patients, visits..." />
+            <button class="absolute right-1 top-1.5 text-med-700 px-3 py-1 rounded-md hover:bg-med-50">Search</button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <button title="Notifications" class="p-2 rounded-md hover:bg-gray-100">
+            <svg class="w-6 h-6 text-slate-600" viewBox="0 0 24 24" fill="none"><path d="M15 17h5l-1.4-1.4A2 2 0 0118 14V11a6 6 0 10-12 0v3c0 .4-.2.8-.6 1.2L4 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+
+          <div class="flex items-center gap-3">
+            <div class="text-right mr-2">
+              <div class="text-sm font-medium">Dr. P.P.Jadeja</div>
+              <div class="text-xs text-slate-400">M.D</div>
+            </div>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHu9MR_AXrMfxXn_xqTQuJQJ3mEG0YxcCgRw&s" alt="avatar" class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
+          </div>
+        </div>
+      </header>
+
+      <!-- page grid -->
+      <main class="p-6 space-y-6">
+        <!-- top metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="bg-white rounded-xl p-4 card-hover shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-slate-400">Total Patients</div>
+                <div class="text-2xl font-semibold mt-1">1,248</div>
+              </div>
+              <div class="bg-med-700 p-3 rounded-lg text-white">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.2 0 4-1.8 4-4S14.2 4 12 4s-4 1.8-4 4 1.8 4 4 4zM4 20v-1.2C4 16.3 7.6 15 12 15s8 1.3 8 3.8V20" fill="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-slate-500">+4.2% since last week</div>
+          </div>
+
+          <div class="bg-white rounded-xl p-4 card-hover shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-slate-400">Today's Visits</div>
+                <div class="text-2xl font-semibold mt-1">23</div>
+              </div>
+              <div class="bg-med-700 p-3 rounded-lg text-white">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M7 10h10M7 6h10M3 20h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-slate-500">3 scheduled in next 2 hours</div>
+          </div>
+
+          <div class="bg-white rounded-xl p-4 card-hover shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-slate-400">New Prescriptions</div>
+                <div class="text-2xl font-semibold mt-1">18</div>
+              </div>
+              <div class="bg-med-700 p-3 rounded-lg text-white">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M6 2h12v4H6zM6 8h12v14H6z" fill="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-slate-500">Top drug: Paracetamol</div>
+          </div>
+
+          <div class="bg-white rounded-xl p-4 card-hover shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-slate-400">Today Revenue</div>
+                <div class="text-2xl font-semibold mt-1">₹1,420</div>
+              </div>
+              <div class="bg-med-700 p-3 rounded-lg text-white">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-slate-500"> +₹220 from appointments</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5 w-full card-hover">
+          <div class="flex flex-row">
+            <a href="{% url 'show_add_patient' %}">
+            <button
+              class="ml-auto px-5 py-2 bg-med-700 text-white rounded-lg text-sm hover:bg-med-1000 transition">
+              + Add Patient
+            </button>
+          </a>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-white rounded-xl p-5 card-hover shadow-sm">
+            <div class="flex flex-col flex-1">
+        
+              <div class="text-slate-500 text-sm">Latest Patient</div>
+              <div class="mt-1 text-xl font-semibold">Amit Kumar</div>
+        
+              <div class="mt-4 grid grid-rows-3 gap-3">
+        
+                <div class="p-3 bg-med-50 rounded-lg">
+                  <div class="text-xs text-slate-500">Blood Sugar</div>
+                  <div class="font-semibold">132 mg/dL</div>
+                </div>
+        
+                <div class="p-3 bg-med-50 rounded-lg">
+                  <div class="text-xs text-slate-500">Heart Rate</div>
+                  <div class="font-semibold">78/min</div>
+                </div>
+        
+                <div class="p-3 bg-med-50 rounded-lg">
+                  <div class="text-xs text-slate-500">Temperature</div>
+                  <div class="font-semibold">98.6°F</div>
+                </div>
+        
+              </div>
+        
+            </div>
+
+          </div>
+
+          <div class="bg-white rounded-xl p-5 card-hover shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-lg font-semibold">Prescriptions Breakdown</h3>
+              <div class="text-sm text-slate-500">Last 7 days</div>
+            </div>
+            <canvas id="prescDonut" height="200"></canvas>
+
+            <div class="mt-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="w-3 h-3 rounded-full bg-med-700 inline-block"></span>
+                  <div class="text-sm">Paracetamol</div>
+                </div>
+                <div class="text-sm font-semibold">42%</div>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+                  <div class="text-sm">Amoxicillin</div>
+                </div>
+                <div class="text-sm font-semibold">28%</div>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="w-3 h-3 rounded-full bg-sky-400 inline-block"></span>
+                  <div class="text-sm">Cough Syrup</div>
+                </div>
+                <div class="text-sm font-semibold">30%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-white rounded-xl p-5 card-hover shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Recent Patients</h3>
+              <div class="flex items-center gap-2">
+                <input type="text" id="filterPatients" placeholder="Search name..." class="border rounded-md px-3 py-2 text-sm" />
+                <button class="px-3 py-2 rounded bg-med-700 text-white hover:bg-med-800">View all</button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="text-slate-400 text-sm">
+                  <tr>
+                    <th class="pb-2">Patient</th>
+                    <th class="pb-2">Last Visit</th>
+                    <th class="pb-2">Clinic</th>
+                    <th class="pb-2">Next Appt</th>
+                    <th class="pb-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="patientsTbody">
+                  <tr class="click-row border-t">
+                    <td class="py-3">Amit Kumar</td>
+                    <td class="py-3">2025-11-01</td>
+                    <td class="py-3">Main Clinic</td>
+                    <td class="py-3">2025-11-15</td>
+                    <td class="py-3"><span class="text-xs px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full">Active</span></td>
+                  </tr>
+                  <tr class="click-row border-t">
+                    <td class="py-3">Neha Shah</td>
+                    <td class="py-3">2025-10-28</td>
+                    <td class="py-3">Main Clinic</td>
+                    <td class="py-3">—</td>
+                    <td class="py-3"><span class="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full">Follow-up</span></td>
+                  </tr>
+                  <tr class="click-row border-t">
+                    <td class="py-3">Raju Das</td>
+                    <td class="py-3">2025-10-15</td>
+                    <td class="py-3">Main Clinic</td>
+                    <td class="py-3">2025-11-05</td>
+                    <td class="py-3"><span class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full">No-show</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl p-5 card-hover shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-lg font-semibold">Scheduled Appointments</h3>
+              <div class="text-sm text-slate-400">Next 24 hrs</div>
+            </div>
+
+            <div class="space-y-4">
+              <div class="p-3 border rounded-lg hover:shadow-sm transition">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <div class="font-medium">Meculam Deo — Standard Consult</div>
+                    <div class="text-sm text-slate-400">09:15am - 10:00am</div>
+                  </div>
+                  <div class="text-sm text-slate-500">In 15m</div>
+                </div>
+                <div class="mt-3 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&q=80" class="w-8 h-8 rounded-full" />
+                    <div class="text-sm">Pinki</div>
+                  </div>
+                  <div>
+                    <button class="px-3 py-1 rounded bg-med-700 text-white hover:bg-med-800">Check-in</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-3 border rounded-lg hover:shadow-sm transition">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <div class="font-medium">Maical Deo — Premium Consult</div>
+                    <div class="text-sm text-slate-400">10:30am - 11:00am</div>
+                  </div>
+                  <div class="text-sm text-slate-500">In 1h</div>
+                </div>
+                <div class="mt-3 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <img src="data:image/jpeg;base64,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" class="w-8 h-8 rounded-full" />
+                    <div class="text-sm">Pankaj Tripathi</div>
+                  </div>
+                  <div>
+                    <button class="px-3 py-1 rounded border border-med-700 text-med-700 hover:bg-med-700 hover:text-white transition">Reschedule</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- footer -->
+        <footer class="text-center text-sm text-slate-400 mt-6">
+          © 2025 MediTrack — Clinic Management System
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- JS: charts & interactivity -->
+  <script>
+    // Mobile sidebar toggle
+    document.getElementById('toggleMobile').addEventListener('click', function(){
+      const sb = document.getElementById('sidebar');
+      if (sb.classList.contains('hidden')) sb.classList.remove('hidden');
+      else sb.classList.add('hidden');
+    });
+
+   
+
+    // Prescriptions donut
+    const prescCtx = document.getElementById('prescDonut').getContext('2d');
+    const prescChart = new Chart(prescCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Paracetamol','Amoxicillin','Cough Syrup'],
+        datasets: [{
+          data: [42, 28, 30],
+          backgroundColor: ['#007B83','#F59E0B','#38BDF8'],
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+
+    // click-row demo: open patient (placeholder)
+    document.querySelectorAll('.click-row').forEach(row=>{
+      row.addEventListener('click', ()=> {
+        const name = row.querySelector('td').innerText;
+        alert('Open patient profile: ' + name);
+      });
+    });
+
+    // Basic patient filter
+    document.getElementById('filterPatients').addEventListener('input', function(e){
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll('#patientsTbody tr').forEach(tr=>{
+        const name = tr.children[0].innerText.toLowerCase();
+        tr.style.display = name.includes(q) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
+    
