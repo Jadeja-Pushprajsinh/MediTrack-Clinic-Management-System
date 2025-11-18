@@ -48,7 +48,6 @@
     .sidebar-scroll { max-height: calc(100vh - 80px); overflow-y:auto; }
     /* clickable row */
     .click-row:hover { background: #f3f9f9; cursor: pointer; }
-    /* custom scrollbar (optional) */
     .sidebar-scroll::-webkit-scrollbar { width: 8px; }
     .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
   </style>
@@ -139,7 +138,7 @@
               <div class="text-sm font-medium">Dr. P.P.Jadeja</div>
               <div class="text-xs text-slate-400">M.D</div>
             </div>
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHu9MR_AXrMfxXn_xqTQuJQJ3mEG0YxcCgRw&s" alt="avatar" class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsinduDaIJu81NGNAMI_PeJw58Dl1Ma9Zb3A&s" alt="avatar" class="w-15 h-14 rounded-full border-2 border-white shadow-sm">
           </div>
         </div>
       </header>
@@ -201,13 +200,14 @@
           </div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5 w-full card-hover">
-          <div class="flex flex-row">
-            <a href="{% url 'show_add_patient' %}">
-            <button
-              class="ml-auto px-5 py-2 bg-med-700 text-white rounded-lg text-sm hover:bg-med-1000 transition">
-              + Add Patient
-            </button>
-          </a>
+          <div class="border border-dotted border-gray-400 rounded-lg p-4 mt-1">
+            <div class="flex justify-end">ff
+                <a href="{% url 'show_add_patient' %}">
+                    <button class="px-5 py-2 bg-med-700 text-white rounded-lg text-sm hover:bg-med-800 transition">
+                      + Add Patient
+                    </button>
+                </a>
+            </div>
           </div>
         </div>
         

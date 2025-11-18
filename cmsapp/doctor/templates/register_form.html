@@ -125,8 +125,8 @@
     <div class="card-form">
       <div class="form-title">Patient Registration</div>
 
-      <form method="post" action="register_patient" autocomplete="on">
-
+      <form method="post" action="register" autocomplete="on">
+        {% csrf_token %}
         <div class="row g-3">
           <div class="col-md-6">
             <div>

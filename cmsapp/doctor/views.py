@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect
 from django.http import HttpRequest,HttpResponse
+from doctor.models import *
 
 def show_login(request):
     return render(request , 'login_form.html')
@@ -34,7 +35,7 @@ def register(request):
         allergies = request.POST.get('allergies')
         address = request.POST.get('address')
 
-        user = Register(email = email , pwd = pwd , fname = fname , lname = lname , phone = phone ,allergies = allergies , created_at = created_at, address = address)
+        user = Register(email = email , pwd = pwd , fname = fname , lname = lname , phone = phone , dob = dob , created_at = created_at, allergies = allergies , address = address)
         user.save()
         return HttpResponse("<script> alert('SUCCESS'); window.location.href=''; </script>")
         
